@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import img_to_array
+from datetime import datetime
 
 model = load_model('sign_language_model.keras')
 
@@ -11,6 +12,11 @@ categories = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
               'Del', 'Nothing', 'Space']
 
 img_height, img_width = 64, 64
+
+def is_operational_time():
+    current_time = datetime.now().time()
+    return current_time >= datetime.strptime("13:00", "%H:%M").time() and \
+           current_time <= datetime.strptime("22:00", "%H:%M").time()
 
 def predict_image(image):
     image_resized = cv2.resize(image, (img_height, img_width))
@@ -38,17 +44,20 @@ def predict_video():
             break
 
     cap.release()
-    
-st.title("ASL Alphabet Recognition (A to Z, Nothing, Space, Del)")
 
-st.header("Upload an Image for Prediction")
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-if uploaded_file is not None:
-    image = np.array(cv2.imdecode(np.fromstring(uploaded_file.read(), np.uint8), 1))
-    st.image(image, caption='Uploaded Image', use_column_width=True)
-    prediction = predict_image(image)
-    st.write(f"Predicted Sign Language Character: **{prediction}**")
+if is_operational_time():
+    st.title("ASL Alphabet Recognition (A to Z, Nothing, Space, Del)")
 
-st.header("Real-time Video Prediction")
-if st.button("Start Video"):
-    predict_video()
+    st.header("Upload an Image for Prediction")
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    if uploaded_file is not None:
+        image = np.array(cv2.imdecode(np.fromstring(uploaded_file.read(), np.uint8), 1))
+        st.image(image, caption='Uploaded Image', use_column_width=True)
+        prediction = predict_image(image)
+        st.write(f"Predicted Sign Language Character: **{prediction}**")
+
+    st.header("Real-time Video Prediction")
+    if st.button("Start Video"):
+        predict_video()
+else:
+    st.write("The model is only operational from 6 PM to 10 PM.")
