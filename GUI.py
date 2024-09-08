@@ -15,7 +15,7 @@ img_height, img_width = 64, 64
 
 def is_operational_time():
     current_time = datetime.now().time()
-    return current_time >= datetime.strptime("13:00", "%H:%M").time() and \
+    return current_time >= datetime.strptime("18:00", "%H:%M").time() and \
            current_time <= datetime.strptime("22:00", "%H:%M").time()
 
 def predict_image(image):
